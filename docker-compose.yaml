@@ -1,0 +1,27 @@
+version: "3.9"
+
+networks:
+  delivery-network:
+    driver: bridge
+
+services:
+  nextfood-mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    networks:
+      - delivery-network
+      
+  delivery-api:
+    image: delivery-api
+    command: ["/wait-for-it.sh", "nextfood-mysql:3306", "-t", "30", "--", "java", "-jar", "api.jar"]
+    environment:
+      DB_HOST: nextfood-mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - delivery-network
+    depends_on:
+      - nextfood-mysql
